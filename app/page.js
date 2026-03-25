@@ -43,11 +43,12 @@ export default function TruckFinder() {
   const [countdown, setCountdown] = useState(0);
 
   // Update countdown timer every second
+  // Use 75 seconds to account for API call duration (~15-20s) plus safe buffer
   useEffect(() => {
     const interval = setInterval(() => {
       if (lastSearchTime) {
         const elapsed = Date.now() - lastSearchTime;
-        const remaining = Math.max(0, Math.ceil((60000 - elapsed) / 1000));
+        const remaining = Math.max(0, Math.ceil((75000 - elapsed) / 1000));
         setCountdown(remaining);
       } else {
         setCountdown(0);
