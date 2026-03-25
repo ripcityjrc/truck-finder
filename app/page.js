@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const DEFAULT_CONFIG = {
   year: "2025",
@@ -39,8 +39,27 @@ export default function TruckFinder() {
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchTs, setSearchTs] = useState(null);
+  const [lastSearchTime, setLastSearchTime] = useState(null);
+  const [countdown, setCountdown] = useState(0);
+
+  // Update countdown timer every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (lastSearchTime) {
+        const elapsed = Date.now() - lastSearchTime;
+        const remaining = Math.max(0, Math.ceil((60000 - elapsed) / 1000));
+        setCountdown(remaining);
+      } else {
+        setCountdown(0);
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [lastSearchTime]);
 
   const search = async () => {
+    // Track search attempt time
+    const searchTime = Date.now();
+    setLastSearchTime(searchTime);
     setLoading(true);
     setError(null);
     setResults([]);
@@ -154,13 +173,13 @@ export default function TruckFinder() {
           </div>
           <button
             onClick={search}
-            disabled={loading}
+            disabled={loading || countdown > 0}
             style={{
-              background: loading ? "#2e3828" : "#4a7a2e",
+              background: (loading || countdown > 0) ? "#2e3828" : "#4a7a2e",
               border: "none",
               borderRadius: 5,
-              color: loading ? "#5a6850" : "#d4f0b4",
-              cursor: loading ? "default" : "pointer",
+              color: (loading || countdown > 0) ? "#5a6850" : "#d4f0b4",
+              cursor: (loading || countdown > 0) ? "default" : "pointer",
               fontFamily: "'DM Mono', monospace",
               fontSize: 12,
               fontWeight: 500,
@@ -178,10 +197,17 @@ export default function TruckFinder() {
                 <span style={{ display: "inline-block", animation: "spin 1s linear infinite", fontSize: 14 }}>⟳</span>
                 Searching dealers...
               </>
+            ) : countdown > 0 ? (
+              <>⏱ Wait {countdown}s</>
             ) : (
               <>{hasSearched ? "⟳ Refresh Search" : "→ Search Inventory"}</>
             )}
           </button>
+          {countdown > 0 && (
+            <div style={{ marginTop: 12, padding: "8px 12px", background: "#1a1508", border: "1px solid #3d3420", borderRadius: 5, fontSize: 11, fontFamily: "'DM Mono', monospace", color: "#b89a5a" }}>
+              ⏱ Rate limit: Wait {countdown} second{countdown !== 1 ? 's' : ''} before next search
+            </div>
+          )}
         </div>
 
         {/* Status bar */}
