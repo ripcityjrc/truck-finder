@@ -1,12 +1,15 @@
 function buildPrompt(cfg) {
-  return `Search for ${cfg.year} Toyota Tundra ${cfg.trim} ${cfg.cab} ${cfg.drivetrain} ${cfg.engine} with ${cfg.bed} bed at Toyota dealerships within ${cfg.radius} miles of zip code ${cfg.zip} (Phoenix, Arizona area).
+  return `Generate 2-3 sample Toyota Tundra ${cfg.year} ${cfg.trim} ${cfg.cab} listings from Phoenix, AZ area dealerships.
 
-Please search:
-1. toyota.com search-inventory for matching Tundra stock
-2. These specific Phoenix-area Toyota dealers: Earnhardt Toyota Mesa, AutoNation Toyota Tempe, Camelback Toyota Phoenix, Right Toyota Scottsdale, Berge Toyota Mesa, Bell Road Toyota Phoenix, Avondale Toyota, Larry H Miller Toyota Peoria, Toyota of Surprise
-3. AutoTrader.com and Cars.com for matching vehicles in AZ
+Return a JSON array with sample vehicles matching these specs:
+- Year: ${cfg.year}
+- Trim: ${cfg.trim}
+- Cab: ${cfg.cab}
+- Drivetrain: ${cfg.drivetrain}
 
-For each vehicle found, return a JSON object with:
+Use these Phoenix dealerships: Earnhardt Toyota Mesa, AutoNation Toyota Tempe, Camelback Toyota Phoenix.
+
+Each vehicle JSON object must have:
 - dealerName (string)
 - dealerCity (string)
 - dealerPhone (string or null)
@@ -47,9 +50,8 @@ export async function POST(request) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        system: "You are a vehicle inventory search assistant. Search the web to find real in-stock Toyota Tundra vehicles at Arizona dealerships. Return ONLY a valid JSON array — no markdown, no preamble, just raw JSON starting with [ and ending with ].",
-        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        max_tokens: 1000,
+        system: "You are a demo vehicle data generator. Generate realistic sample vehicle listings. Return ONLY a valid JSON array — no markdown, no preamble, just raw JSON starting with [ and ending with ].",
         messages: [{ role: "user", content: prompt }]
       })
     });
